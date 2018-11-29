@@ -1,0 +1,10 @@
+#Skrypt który po podaniu ID GPO(gPLink) podaje jakie OU są powiązane i userów w tych OU.
+$ous = Get-ADOrganizationalUnit -LDAPFilter '(gPLink=*98909239-AB02-46CE-8C50-7B05BEEEDB24*)' | select distinguishedname
+$ous
+foreach( $i in $ous){
+$i = "'" + $i + "'"
+$i =$i  -replace '[{}]',''
+$i =$i  -replace '@distinguishedname=',''
+$i =$i.Substring(1,$i.Length-2)
+Get-ADUser -Filter * -Searchbase $i 
+}
