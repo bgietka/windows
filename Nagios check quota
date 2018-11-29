@@ -1,0 +1,41 @@
+$quotas = Get-FsrmQuota
+
+$warn = $false
+$critical = $false
+
+foreach ($quota in $quotas) {
+    $size = $quota.size / 1073741824
+    $size = [math]::Round($size)
+
+    $free = ($quota.size - $quota.usage) / 1073741824
+    $free = [math]::Round($free)
+    $freep = ($quota.size - $quota.usage)  / $quota.size
+    $freep *= 100 
+    $freep = [math]::Round($freep)
+
+    $used = $quota.usage / 1073741824
+    $used = [math]::Round($used)
+    $usedp = $quota.usage / $quota.size
+    $usedp *= 100 
+    $usedp = [math]::Round($usedp)
+	
+	$status = "OK"
+	if($freep -le 10) {
+		$warn = $true
+		$status = "WARNING"
+	}
+	if($freep -le 5) {
+		$critical = $true
+		$status = "CRITICAL"
+	}
+
+	Write-Host "$($status) - Quota: $($quota.path) - Size: $($size)GB - Free: $($free)GB($($freep)%) - Used: $($used)GB($($usedp)%)"
+}
+
+if($critical -eq $true) { 
+	exit 2
+}
+if($warn -eq $true) { 
+	exit 1
+}
+exit 0
